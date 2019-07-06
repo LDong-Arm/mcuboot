@@ -1,0 +1,32 @@
+{
+    "name": "mcuboot",
+    "config": {
+	"signature-algorithm": {
+	    "help": "The algorithm used for digital signing. 0 = RSA, 1 = EC256",
+	    "value": 0
+	},
+	"overwrite-only": {
+	    "help": "The default is to support A/B image swapping with rollback. A simpler code path, which only supports overwriting the existing image with the update image, is also available."
+	    "value": 0
+	},
+	"overwrite-only-fast": {
+	    "help": "Uncomment to only erase and overwrite those primary slot sectors needed to install the new image, rather than the entire image slot."
+	    "value": 0
+	},
+	"validate-primary-slot": {
+	    "help": "Always check the signature of the image in the primary slot before booting, even if no upgrade was performed. This is recommended if the boot time penalty is acceptable",
+	    "value": 1
+	},
+	"enable-logging": {
+	    "help": "Enable mcuboot logging",
+	    "value": 1
+	},
+	"max-img-sectors": {
+	    "help": "Maximum number of flash sectors per image slot",
+	    "value": 128
+	},
+	"enable-encrypted-images": {
+	    "help": "Enable support for encrypted images using RSA",
+	    "value": 1
+	}
+}
