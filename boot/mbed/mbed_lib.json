@@ -1,16 +1,22 @@
 {
     "name": "mcuboot",
+    "target_overrides": {
+	"*": {
+	    "target.restrict_size": "0x10000",
+	    "target.components_add": ["FLASHIAP"]
+	}
+    },
     "config": {
 	"signature-algorithm": {
 	    "help": "The algorithm used for digital signing. 0 = RSA, 1 = EC256",
 	    "value": 0
 	},
 	"overwrite-only": {
-	    "help": "The default is to support A/B image swapping with rollback. A simpler code path, which only supports overwriting the existing image with the update image, is also available."
+	    "help": "The default is to support A/B image swapping with rollback. A simpler code path, which only supports overwriting the existing image with the update image, is also available.",
 	    "value": 0
 	},
 	"overwrite-only-fast": {
-	    "help": "Uncomment to only erase and overwrite those primary slot sectors needed to install the new image, rather than the entire image slot."
+	    "help": "Uncomment to only erase and overwrite those primary slot sectors needed to install the new image, rather than the entire image slot.",
 	    "value": 0
 	},
 	"validate-primary-slot": {
@@ -28,5 +34,9 @@
 	"enable-encrypted-images": {
 	    "help": "Enable support for encrypted images using RSA",
 	    "value": 1
-	}
+	},
+	"scratch-size": {
+	    "help": "Size of scratch area in bytes. Must be sector-aligned.",
+	    "value": "0x4000"
+    }
 }
