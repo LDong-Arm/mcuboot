@@ -1,0 +1,11 @@
+boot/boot_serial/*
+boot/mynewt/*
+boot/zephyr/*
+ci/*
+docs/*
+ext/*
+ptest/*
+samples/*
+scripts/*
+sim/*
+testplan/*

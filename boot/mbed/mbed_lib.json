@@ -38,5 +38,6 @@
 	"scratch-size": {
 	    "help": "Size of scratch area in bytes. Must be sector-aligned.",
 	    "value": "0x4000"
+	}
     }
 }
