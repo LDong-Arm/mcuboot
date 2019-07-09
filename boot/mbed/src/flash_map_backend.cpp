@@ -6,17 +6,13 @@
  */
 
 #include "flash_map_backend.h"
+#include <sysflash/sysflash.h>
 
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
 
 #define SCRATCH_START_ADDR	((APPLICATION_ADDR + APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
 #define SCRATCH_END_ADDR		(SCRATCH_START_ADDR + MBED_CONF_MCUBOOT_SCRATCH_SIZE)
-
-#define RESERVED_ID		0
-#define PRIMARY_ID		1
-#define SECONDARY_ID		2
-#define SCRATCH_ID		3
 
 /** Application defined secondary block device */
 extern mbed::BlockDevice* mcuboot_secondary_bd;
@@ -101,19 +97,50 @@ uint8_t flash_area_erased_val(const struct flash_area* fap) {
 
 int flash_area_read_is_empty(const struct flash_area* fap, uint32_t off,
 		void* dst, uint32_t len) {
-	mbed::BlockDevice* bd = flash_map_bd[fap->fa_id];
+
+	if(flash_area_read(fap, off, dst, len)) {
+		return -1; // A problem occurred during read operation
+	}
+
+	// Check buffer to see if all bytes are equal to erased value
+	uint8_t erased_value = flash_area_erased_val(fap);
+	for(int i = 0; i < len; i++) {
+		uint8_t val = ((uint8_t*) dst)[i];
+		if(val != erased_value) {
+			return 0;
+		}
+	}
+
+	// All bytes were erased
+	return 1;
+
 }
 
 int flash_area_get_sectors(int fa_id, uint32_t* count,
 		struct flash_sector* sectors) {
-}
+	mbed::BlockDevice* bd = flash_map_bd[fa_id];
 
-int __attribute__((deprecated)) flash_area_to_sectors(int idx, int* cnt,
-		struct flash_area* ret) {
+	// Loop through sectors and collect information on them
+	bd_addr_t offset = 0;
+	*count = 0;
+	while(bd->is_valid_read(offset, 1)
+	&& *count < MBED_CONF_MCUBOOT_MAX_IMG_SECTORS) {
+
+		sectors[*count].fs_off = offset;
+		bd_size_t erase_size = bd->get_erase_size(offset);
+		sectors[*count].fs_size = erase_size;
+
+		offset += erase_size;
+		*count++;
+	}
+
+	return 0;
 }
 
 int flash_area_id_from_image_slot(int slot) {
+	return slot;
 }
 
 int flash_area_id_to_image_slot(int area_id) {
+	return area_id;
 }

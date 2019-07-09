@@ -134,12 +134,6 @@ int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
 int flash_area_get_sectors(int fa_id, uint32_t *count,
   struct flash_sector *sectors);
 
-/*
- * Similar to flash_area_get_sectors(), but return the values in an
- * array of struct flash_area instead.
- */
-__attribute__((deprecated))
-int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
 
 int flash_area_id_from_image_slot(int slot);
 int flash_area_id_to_image_slot(int area_id);

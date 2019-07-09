@@ -17,38 +17,27 @@
  * under the License.
  */
 
-#include "platform/mbed_application.h"
-#include "platform/mbed_toolchain.h"
+#ifndef H_HAL_FLASH_
+#define H_HAL_FLASH_
 
-#include "bootutil.h"
-
-#if !DEVICE_FLASH
-#error mcuboot requires FlashIAP functionality on the target!
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/**
- * Hook for user app to initialize hardware/flash
- * @todo - better documentation (lol)
- */
-MBED_WEAK void mbed_mcuboot_user_init(void) {
+#include <inttypes.h>
 
+int hal_flash_read(uint8_t flash_id, uint32_t address, void *dst,
+  uint32_t num_bytes);
+int hal_flash_write(uint8_t flash_id, uint32_t address, const void *src,
+  uint32_t num_bytes);
+int hal_flash_erase_sector(uint8_t flash_id, uint32_t sector_address);
+int hal_flash_erase(uint8_t flash_id, uint32_t address, uint32_t num_bytes);
+uint8_t hal_flash_align(uint8_t flash_id);
+int hal_flash_init(void);
+
+
+#ifdef __cplusplus
 }
+#endif
 
-int main(void) {
-
-	mbed_mcuboot_user_init();
-
-	struct boot_rsp rsp;
-	int rc;
-
-	rc = boot_go(&rsp);
-	if(rc != 0) {
-		// Couldn't find a bootable image
-		while(true)
-			;
-	}
-
-	mbed_start_application(rsp.br_image_off);
-
-}
-
+#endif /* H_HAL_FLASH_ */

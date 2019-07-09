@@ -13,15 +13,17 @@
  * You must choose exactly one signature type.
  */
 
-/* Default to RSA signatures */
+/* Default to RSA-2048 signatures */
 #if !defined(MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM)
 #define MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM 0
+#define MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH 2048
 #endif
 
 #if MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM
 #define MCUBOOT_SIGN_EC256
 #else
 #define MCUBOOT_SIGN_RSA
+#define MCUBOOT_SIGN_RSA_LEN MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH
 #endif
 
 /*
