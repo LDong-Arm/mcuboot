@@ -11,29 +11,40 @@
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
 
-#define SCRATCH_START_ADDR	((APPLICATION_ADDR + APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
-#define SCRATCH_END_ADDR		(SCRATCH_START_ADDR + MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+#define SCRATCH_START_ADDR	((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
 
 /** Application defined secondary block device */
 extern mbed::BlockDevice* mcuboot_secondary_bd;
 
 /** Internal application block device */
-static FlashIAPBlockDevice mcuboot_primary_bd(APPLICATION_ADDR, SCRATCH_START_ADDR);
+static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR, POST_APPLICATION_SIZE);
 
 /** Scratch space is at the end of internal flash, after the main application */
-static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, SCRATCH_END_ADDR);
+static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
 
 
 static mbed::BlockDevice* flash_map_bd[] = {
-		NULL,											/** Reserved for bootloader flash area */
 		(mbed::BlockDevice*) &mcuboot_primary_bd,		/** Primary (loadable) image area */
 		mcuboot_secondary_bd,							/** Secondary (update candidate) image area */
 		(mbed::BlockDevice*) &mcuboot_scratch_bd			/** Scratch space for swapping images */
 };
 
+//static struct flash_area flash_areas[3];
+//static uint8_t open_count[3];
+
 int flash_area_open(uint8_t id, const struct flash_area** fapp) {
-	// Allocate a new flash area struct and populate it
-	struct flash_area* fap = new struct flash_area();
+
+	struct flash_area* fap = (struct flash_area*) *fapp;
+	// If the passed in pointer is null
+	if((uint32_t) *fapp == 0) {
+		// Allocate a new flash area struct and populate it
+		fap = new struct flash_area();
+		*fapp = fap;
+	}
+	else {
+		return 0;
+	}
+
 	mbed::BlockDevice* bd = flash_map_bd[id];
 
 	fap->fa_id = id;
@@ -44,7 +55,7 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 	case RESERVED_ID:
 		return -1;
 	case PRIMARY_ID:
-		fap->fa_off = APPLICATION_ADDR;
+		fap->fa_off = POST_APPLICATION_ADDR;
 		break;
 	case SECONDARY_ID:
 		fap->fa_off = 0;
@@ -87,7 +98,7 @@ int flash_area_erase(const struct flash_area* fap, uint32_t off, uint32_t len) {
 
 uint8_t flash_area_align(const struct flash_area* fap) {
 	mbed::BlockDevice* bd = flash_map_bd[fap->fa_id];
-	return bd->get_erase_size();
+	return bd->get_program_size();
 }
 
 uint8_t flash_area_erased_val(const struct flash_area* fap) {
@@ -104,7 +115,7 @@ int flash_area_read_is_empty(const struct flash_area* fap, uint32_t off,
 
 	// Check buffer to see if all bytes are equal to erased value
 	uint8_t erased_value = flash_area_erased_val(fap);
-	for(int i = 0; i < len; i++) {
+	for(unsigned int i = 0; i < len; i++) {
 		uint8_t val = ((uint8_t*) dst)[i];
 		if(val != erased_value) {
 			return 0;
@@ -131,7 +142,7 @@ int flash_area_get_sectors(int fa_id, uint32_t* count,
 		sectors[*count].fs_size = erase_size;
 
 		offset += erase_size;
-		*count++;
+		*count += 1;
 	}
 
 	return 0;

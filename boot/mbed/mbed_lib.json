@@ -2,7 +2,7 @@
     "name": "mcuboot",
     "target_overrides": {
 	"*": {
-	    "target.restrict_size": "0x20000",
+	    "target.restrict_size": "0x30000",
 	    "target.features_add": ["STORAGE"],
 	    "target.components_add": ["FLASHIAP"]
 	}
