@@ -19,6 +19,10 @@
 
 #include "platform/mbed_application.h"
 #include "platform/mbed_toolchain.h"
+#include "platform/mbed_assert.h"
+#include "platform/mbed_interface.h"
+
+#include "mbedtls/platform.h"
 
 #include "bootutil.h"
 
@@ -36,6 +40,9 @@ MBED_WEAK void mbed_mcuboot_user_init(void) {
 
 int main(void) {
 
+	mbedtls_platform_context unused_ctx;
+	MBED_ASSERT(mbedtls_platform_setup(&unused_ctx) == 0);
+
 	mbed_mcuboot_user_init();
 
 	struct boot_rsp rsp;
@@ -43,12 +50,15 @@ int main(void) {
 
 	rc = boot_go(&rsp);
 	if(rc != 0) {
+
+		mbed_die();
+
 		// Couldn't find a bootable image
 		while(true)
 			;
 	}
 
-	mbed_start_application(rsp.br_image_off);
-
+	//mbed_start_application(rsp.br_image_off);
+	mbed_start_application(POST_APPLICATION_ADDR);
 }
 

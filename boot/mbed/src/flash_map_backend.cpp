@@ -17,7 +17,8 @@
 extern mbed::BlockDevice* mcuboot_secondary_bd;
 
 /** Internal application block device */
-static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR, POST_APPLICATION_SIZE);
+static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-0x1000,
+		POST_APPLICATION_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE+0x1000);
 
 /** Scratch space is at the end of internal flash, after the main application */
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
@@ -29,21 +30,19 @@ static mbed::BlockDevice* flash_map_bd[] = {
 		(mbed::BlockDevice*) &mcuboot_scratch_bd			/** Scratch space for swapping images */
 };
 
-//static struct flash_area flash_areas[3];
-//static uint8_t open_count[3];
+static struct flash_area flash_areas[3];
+static uint8_t open_count[3];
 
 int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 
-	struct flash_area* fap = (struct flash_area*) *fapp;
-	// If the passed in pointer is null
-	if((uint32_t) *fapp == 0) {
-		// Allocate a new flash area struct and populate it
-		fap = new struct flash_area();
-		*fapp = fap;
-	}
-	else {
+	*fapp = &flash_areas[id];
+
+	// Flash area is open
+	if(open_count[id]++) {
 		return 0;
 	}
+
+	struct flash_area* fap = (struct flash_area*)*fapp;
 
 	mbed::BlockDevice* bd = flash_map_bd[id];
 
@@ -52,8 +51,6 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 
 	// Only populate the offset if it's internal
 	switch(id) {
-	case RESERVED_ID:
-		return -1;
 	case PRIMARY_ID:
 		fap->fa_off = POST_APPLICATION_ADDR;
 		break;
@@ -74,9 +71,10 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 
 void flash_area_close(const struct flash_area* fap) {
 	// Delete the flash area struct
-	mbed::BlockDevice* bd = flash_map_bd[fap->fa_id];
-	bd->deinit();
-	delete fap;
+	if(--open_count[fap->fa_id] == 0) {
+		mbed::BlockDevice* bd = flash_map_bd[fap->fa_id];
+		bd->deinit();
+	}
 }
 
 int flash_area_read(const struct flash_area* fap, uint32_t off, void* dst,
