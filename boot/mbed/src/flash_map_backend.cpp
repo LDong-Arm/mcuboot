@@ -7,6 +7,7 @@
 
 #include "flash_map_backend.h"
 #include <sysflash/sysflash.h>
+#include <string.h>
 
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
@@ -80,7 +81,19 @@ void flash_area_close(const struct flash_area* fap) {
 int flash_area_read(const struct flash_area* fap, uint32_t off, void* dst,
 		uint32_t len) {
 	mbed::BlockDevice* bd = flash_map_bd[fap->fa_id];
-	return bd->read(dst, off, len);
+
+	// If the read is invalid...
+	if(!bd->is_valid_read(off, len)) {
+		// Read back the minimum supported by the bd and copy over
+		uint8_t* buf = new uint8_t[bd->get_read_size()]();
+		int ret_val = bd->read(buf, off, bd->get_read_size());
+		memcpy(dst, (const void*) buf, len);
+		delete[] buf;
+		return ret_val;
+	}
+	else {
+		return bd->read(dst, off, len);
+	}
 }
 
 int flash_area_write(const struct flash_area* fap, uint32_t off, const void* src,
@@ -132,7 +145,7 @@ int flash_area_get_sectors(int fa_id, uint32_t* count,
 	// Loop through sectors and collect information on them
 	bd_addr_t offset = 0;
 	*count = 0;
-	while(bd->is_valid_read(offset, 1)
+	while(bd->is_valid_read(offset, bd->get_read_size())
 	&& *count < MBED_CONF_MCUBOOT_MAX_IMG_SECTORS) {
 
 		sectors[*count].fs_off = offset;
