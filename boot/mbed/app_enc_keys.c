@@ -71,7 +71,7 @@ const int bootutil_key_cnt = 1;
 
 #if defined(MCUBOOT_ENCRYPT_RSA)
 
-extern unsigned char *enc_priv_key;
+extern const unsigned char enc_priv_key[];
 extern const unsigned int enc_priv_key_len;
 
 const struct bootutil_key bootutil_enc_key = {
