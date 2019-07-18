@@ -40,9 +40,11 @@ MBED_WEAK void mbed_mcuboot_user_init(void) {
 
 int main(void) {
 
+	// Initialize mbedtls library for use by mcuboot
 	mbedtls_platform_context unused_ctx;
 	MBED_ASSERT(mbedtls_platform_setup(&unused_ctx) == 0);
 
+	// Run user initialization
 	mbed_mcuboot_user_init();
 
 	struct boot_rsp rsp;
@@ -51,14 +53,15 @@ int main(void) {
 	rc = boot_go(&rsp);
 	if(rc != 0) {
 
+		// TODO - recover (factory reset?)
+
 		mbed_die();
 
 		// Couldn't find a bootable image
-		while(true)
-			;
+		while(true) {
+		}
 	}
 
-	//mbed_start_application(rsp.br_image_off);
-	mbed_start_application(POST_APPLICATION_ADDR);
+	// Run the application in the primary slot
+	mbed_start_application(rsp.br_image_off);
 }
-
