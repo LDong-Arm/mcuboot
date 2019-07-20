@@ -26,6 +26,8 @@
 
 #include "bootutil.h"
 
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+
 #if !DEVICE_FLASH
 #error mcuboot requires FlashIAP functionality on the target!
 #endif
@@ -65,3 +67,5 @@ int main(void) {
 	// Run the application in the primary slot
 	mbed_start_application(rsp.br_image_off);
 }
+
+#endif

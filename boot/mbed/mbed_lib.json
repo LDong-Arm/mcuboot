@@ -43,6 +43,10 @@
 	"scratch-size": {
 	    "help": "Size of scratch area in bytes. Must be sector-aligned.",
 	    "value": "0x4000"
+	},
+	"bootloader-build": {
+	    "help": "If building the bootloader, set to 1 (default). If building as a library (for use by an application) set to 0",
+	    "value": 1
 	}
     }
 }

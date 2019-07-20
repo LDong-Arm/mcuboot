@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+
 #include <bootutil/sign_key.h>
 
 // TODO - Remove Zephyr references
@@ -80,6 +82,8 @@ const struct bootutil_key bootutil_enc_key = {
 };
 #elif defined(MCUBOOT_ENCRYPT_KW)
 #error "Encrypted images with AES-KW is not implemented yet."
+#endif
+
 #endif
 
 #endif
