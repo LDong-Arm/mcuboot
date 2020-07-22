@@ -1,6 +1,7 @@
 boot/boot_serial/*
 boot/mynewt/*
 boot/zephyr/*
+boot/cypress/*
 ci/*
 docs/*
 ext/*
