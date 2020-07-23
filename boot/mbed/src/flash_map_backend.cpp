@@ -166,3 +166,45 @@ int flash_area_id_from_image_slot(int slot) {
 int flash_area_id_to_image_slot(int area_id) {
 	return area_id;
 }
+
+/**
+ * TODO The below were added so mcuboot would build -- they have NOT
+ * been tested with Multi-image DFU enabled
+ */
+
+/*
+ * This depends on the mappings defined in sysflash.h.
+ * MCUBoot uses continuous numbering for the primary slot, the secondary slot,
+ * and the scratch while zephyr might number it differently.
+ */
+int flash_area_id_from_multi_image_slot(int image_index, int slot)
+{
+    return FLASH_AREA_IMAGE_PRIMARY(image_index);
+//    switch (slot) {
+//    case 0: return FLASH_AREA_IMAGE_PRIMARY(image_index);
+//#if !defined(MBED_CONF_MCUBOOT_SINGLE_IMAGE_DFU)
+//    case 1: return FLASH_AREA_IMAGE_SECONDARY(image_index);
+//#if !defined(MBED_CONF_MCUBOOT_BOOT_SWAP_MOVE)
+//    case 2: return FLASH_AREA_IMAGE_SCRATCH;
+//#endif
+//#endif
+//    }
+//
+//    return -EINVAL; /* flash_area_open will fail on that */
+}
+
+int flash_area_id_to_multi_image_slot(int image_index, int area_id)
+{
+    return 0;
+//    if (area_id == FLASH_AREA_IMAGE_PRIMARY(image_index)) {
+//        return 0;
+//    }
+//#if !defined(MBED_CONF_MCUBOOT_SINGLE_IMAGE_DFU)
+//    if (area_id == FLASH_AREA_IMAGE_SECONDARY(image_index)) {
+//        return 1;
+//    }
+//#endif
+//
+//    //BOOT_LOG_ERR("invalid flash area ID");
+//    return -1;
+}

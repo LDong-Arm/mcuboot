@@ -16,8 +16,22 @@
 	    "help": "If RSA is used for signature algorithm, this specifies the length. Valid values are 2048 or 3072",
 	    "value": 2048
 	},
+        "use-mbed-tls": {
+            "help": "Use Mbed TLS as the crypto library backend (default)",
+            "value": 1
+        },
+        "use-tinycrypt": {
+            "help": "Use tinycrypt as the crypto library backend",
+            "value": 0
+        },
+        "hardware-key": {
+            "help": "Use hardware key (not implemented yet)",
+            "macro": "MCUBOOT_HW_KEY",
+            "value": 0
+        },
 	"overwrite-only": {
 	    "help": "The default is to support A/B image swapping with rollback. A simpler code path, which only supports overwriting the existing image with the update image, is also available.",
+            "macro": "MCUBOOT_OVERWRITE_ONLY",
 	    "value": 0
 	},
 	"overwrite-only-fast": {
@@ -26,24 +40,79 @@
 	},
 	"validate-primary-slot": {
 	    "help": "Always check the signature of the image in the primary slot before booting, even if no upgrade was performed. This is recommended if the boot time penalty is acceptable",
+            "macro": "MCUBOOT_VALIDATE_PRIMARY_SLOT",
 	    "value": 1
 	},
 	"enable-logging": {
 	    "help": "Enable mcuboot logging",
+            "macro": "MCUBOOT_HAVE_LOGGING",
 	    "value": 1
 	},
 	"max-img-sectors": {
 	    "help": "Maximum number of flash sectors per image slot",
 	    "value": 128
 	},
-	"enable-encrypted-images": {
-	    "help": "Enable support for encrypted images using RSA",
-	    "value": 1
-	},
 	"scratch-size": {
 	    "help": "Size of scratch area in bytes. Must be sector-aligned.",
 	    "value": "0x4000"
 	},
+        "single-image-dfu": {
+            "help": "Disable multi-image DFU (not tested/implemented yet)",
+            "value": 1
+        },
+        "boot-swap-move": {
+            "help": "Boot swap using move(?)",
+            "value": 0
+        },
+        "updateable-image-number": {
+            "help": "Updateable image number(?)"
+        },
+        "swap-save-enctlv": {
+            "help": "Swap save enctlv(?)",
+            "value": 0
+        },
+        "encrypt-rsa": {
+            "help": "Encrypt images using RSA",
+            "value": 0
+        },
+        "encrypt-ec256": {
+            "help": "Encrypt images using EC256",
+            "value": 0
+        },
+        "encrypt-x25519": {
+            "help": "Encrypt images using X25519",
+            "value": 0
+        },
+        "bootstrap": {
+            "help": "Bootstrap(?)",
+            "macro": "MCUBOOT_BOOTSTRAP",
+            "value": 0
+        },
+        "use-bench": {
+            "help": "Use bench(?)",
+            "macro": "MCUBOOT_USE_BENCH",
+            "value": 0
+        },
+        "downgrade-prevention": {
+            "help": "Prevent downgrades",
+            "macro": "MCUBOOT_DOWNGRADE_PREVENTION",
+            "value": 0
+        },
+        "hw-downgrade-prevention": {
+            "help": "Hardware prevent downgrades(?)",
+            "macro": "MCUBOOT_HW_ROLLBACK_PROT",
+            "value": 0
+        },
+        "measured-boot": {
+            "help": "Measured boot (presumably timing statistics?)",
+            "macro": "MCUBOOT_MEASURED_BOOT",
+            "value": 0
+        },
+        "share-data": {
+            "help": "Share data(?)",
+            "macro": "MCUBOOT_DATA_SHARING",
+            "value": 0
+        },
 	"bootloader-build": {
 	    "help": "If building the bootloader, set to 1 (default). If building as a library (for use by an application) set to 0",
 	    "value": 1
