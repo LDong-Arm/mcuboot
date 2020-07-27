@@ -45,7 +45,6 @@
 	},
 	"enable-logging": {
 	    "help": "Enable mcuboot logging",
-            "macro": "MCUBOOT_HAVE_LOGGING",
 	    "value": 1
 	},
 	"max-img-sectors": {

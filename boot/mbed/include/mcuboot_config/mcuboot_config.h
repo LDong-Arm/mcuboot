@@ -113,7 +113,9 @@
  *    MCUBOOT_LOG_ERR > MCUBOOT_LOG_WRN > MCUBOOT_LOG_INF > MCUBOOT_LOG_DBG
  */
 
-// MCUBOOT_HAVE_LOGGING is now directly declared through mbed_app.json
+#if MBED_CONF_MCUBOOT_ENABLE_LOGGING
+#define MCUBOOT_HAVE_LOGGING 1
+#endif
 
 /*
  * Encrypted Images
