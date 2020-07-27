@@ -26,12 +26,10 @@
         },
         "hardware-key": {
             "help": "Use hardware key (not implemented yet)",
-            "macro": "MCUBOOT_HW_KEY",
             "value": 0
         },
 	"overwrite-only": {
 	    "help": "The default is to support A/B image swapping with rollback. A simpler code path, which only supports overwriting the existing image with the update image, is also available.",
-            "macro": "MCUBOOT_OVERWRITE_ONLY",
 	    "value": 0
 	},
 	"overwrite-only-fast": {
@@ -40,8 +38,7 @@
 	},
 	"validate-primary-slot": {
 	    "help": "Always check the signature of the image in the primary slot before booting, even if no upgrade was performed. This is recommended if the boot time penalty is acceptable",
-            "macro": "MCUBOOT_VALIDATE_PRIMARY_SLOT",
-	    "value": 1
+	    "value": 0
 	},
 	"enable-logging": {
 	    "help": "Enable mcuboot logging",
@@ -84,32 +81,26 @@
         },
         "bootstrap": {
             "help": "Bootstrap(?)",
-            "macro": "MCUBOOT_BOOTSTRAP",
             "value": 0
         },
         "use-bench": {
             "help": "Use bench(?)",
-            "macro": "MCUBOOT_USE_BENCH",
             "value": 0
         },
         "downgrade-prevention": {
             "help": "Prevent downgrades",
-            "macro": "MCUBOOT_DOWNGRADE_PREVENTION",
             "value": 0
         },
         "hw-downgrade-prevention": {
             "help": "Hardware prevent downgrades(?)",
-            "macro": "MCUBOOT_HW_ROLLBACK_PROT",
             "value": 0
         },
         "measured-boot": {
             "help": "Measured boot (presumably timing statistics?)",
-            "macro": "MCUBOOT_MEASURED_BOOT",
             "value": 0
         },
         "share-data": {
             "help": "Share data(?)",
-            "macro": "MCUBOOT_DATA_SHARING",
             "value": 0
         },
 	"bootloader-build": {

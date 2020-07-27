@@ -47,11 +47,22 @@
 //#define MCUBOOT_USE_CC310
 //#endif
 
+#if MBED_CONF_MCUBOOT_HARDWARE_KEY
+#define MCUBOOT_HW_KEY
+#endif
+
+#if MBED_CONF_MCUBOOT_OVERWRITE_ONLY
+#define MCUBOOT_OVERWRITE_ONLY
+#endif
+
 /*
  * Always check the signature of the image in the primary slot before booting,
  * even if no upgrade was performed. This is recommended if the boot
  * time penalty is acceptable.
  */
+#if MBED_CONF_MCUBOOT_VALIDATE_PRIMARY_SLOT
+#define MCUBOOT_VALIDATE_PRIMARY_SLOT
+#endif
 
 /*
  * Upgrade mode
@@ -129,6 +140,30 @@
 #elif MBED_CONF_MCUBOOT_ENCRYPT_X25519
 #define MCUBOOT_ENC_IMAGES
 #define MCUBOOT_ENCRYPT_X25519
+#endif
+
+#if MBED_CONF_MCUBOOT_BOOTSTRAP
+#define MCUBOOT_BOOTSTRAP
+#endif
+
+#if MBED_CONF_MCUBOOT_USE_BENCH
+#define MCUBOOT_USE_BENCH
+#endif
+
+#if MBED_CONF_MCUBOOT_DOWNGRADE_PREVENTION
+#define MCUBOOT_DOWNGRADE_PREVENTION
+#endif
+
+#if MBED_CONF_MCUBOOT_HW_DOWNGRADE_PREVENTION
+#define MCUBOOT_HW_ROLLBACK_PROT
+#endif
+
+#if MBED_CONF_MCUBOOT_MEASURED_BOOT
+#define MCUBOOT_MEASURED_BOOT
+#endif
+
+#if MBED_CONF_MCUBOOT_SHARE_DATA
+#define MCUBOOT_DATA_SHARING
 #endif
 
 /*
