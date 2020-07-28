@@ -20,8 +20,8 @@
 extern mbed::BlockDevice* mcuboot_secondary_bd;
 
 /** Internal application block device */
-static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-0x1000,
-		POST_APPLICATION_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE+0x1000);
+static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
+		POST_APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
 
 /** Scratch space is at the end of internal flash, after the main application */
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);

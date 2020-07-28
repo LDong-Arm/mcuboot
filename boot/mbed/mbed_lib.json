@@ -1,6 +1,10 @@
 {
     "name": "mcuboot",
     "config": {
+        "header-size": {
+            "help": "Header size, in bytes, prepended to the bootable application image (default: 1kB)",
+            "value": 1024
+        },
 	"signature-algorithm": {
 	    "help": "The algorithm used for digital signing. 0 = RSA, 1 = EC256",
 	    "value": 0
