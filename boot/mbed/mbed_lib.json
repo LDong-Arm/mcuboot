@@ -35,7 +35,7 @@
 	},
 	"validate-primary-slot": {
 	    "help": "Always check the signature of the image in the primary slot before booting, even if no upgrade was performed. This is recommended if the boot time penalty is acceptable",
-	    "value": 0
+	    "value": 1
 	},
 	"enable-logging": {
 	    "help": "Enable mcuboot logging",
