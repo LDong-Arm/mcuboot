@@ -6,8 +6,11 @@
  */
 
 #include "flash_map_backend.h"
+#include "secondary_bd.h"
 #include <sysflash/sysflash.h>
 #include <string.h>
+
+#include "platform/mbed_toolchain.h"
 
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
@@ -16,8 +19,12 @@
 
 #define SCRATCH_START_ADDR	((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
 
+MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
+    return mbed::BlockDevice::get_default_instance();
+}
+
 /** Application defined secondary block device */
-extern mbed::BlockDevice* mcuboot_secondary_bd;
+mbed::BlockDevice* mcuboot_secondary_bd = get_secondary_bd();
 
 /** Internal application block device */
 static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
