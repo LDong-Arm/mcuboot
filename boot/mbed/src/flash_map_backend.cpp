@@ -12,6 +12,8 @@
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
 
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+
 #define SCRATCH_START_ADDR	((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
 
 /** Application defined secondary block device */
@@ -208,3 +210,5 @@ int flash_area_id_to_multi_image_slot(int image_index, int area_id)
 //    //BOOT_LOG_ERR("invalid flash area ID");
 //    return -1;
 }
+
+#endif
