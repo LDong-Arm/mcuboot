@@ -34,7 +34,7 @@ static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MC
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
 
 
-static mbed::BlockDevice* flash_map_bd[] = {
+static mbed::BlockDevice* flash_map_bd[3] = {
 		(mbed::BlockDevice*) &mcuboot_primary_bd,		/** Primary (loadable) image area */
 		mcuboot_secondary_bd,							/** Secondary (update candidate) image area */
 		(mbed::BlockDevice*) &mcuboot_scratch_bd			/** Scratch space for swapping images */
@@ -42,6 +42,12 @@ static mbed::BlockDevice* flash_map_bd[] = {
 
 static struct flash_area flash_areas[3];
 static uint8_t open_count[3];
+
+int initialize_flash_areas(void) {
+    for(int i = 0; i < 3; i++) {
+        flash_map_bd[i]->init();
+    }
+}
 
 int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 

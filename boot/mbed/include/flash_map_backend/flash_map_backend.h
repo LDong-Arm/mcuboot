@@ -94,6 +94,11 @@ struct flash_sector {
     uint32_t fs_size;
 };
 
+/**
+ * Initialize flash devices
+ */
+int initialize_flash_areas(void);
+
 /*
  * Start using flash area.
  */

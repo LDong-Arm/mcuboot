@@ -26,6 +26,8 @@
 
 #include "bootutil.h"
 
+#include "flash_map_backend.h"
+
 #if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
 
 #if !DEVICE_FLASH
@@ -45,6 +47,9 @@ int main(void) {
 	// Initialize mbedtls library for use by mcuboot
 	mbedtls_platform_context unused_ctx;
 	MBED_ASSERT(mbedtls_platform_setup(&unused_ctx) == 0);
+
+	// Initialize flash areas
+	initialize_flash_areas();
 
 	// Run user initialization
 	mbed_mcuboot_user_init();
