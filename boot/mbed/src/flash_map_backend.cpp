@@ -15,9 +15,13 @@
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
 
+// Retarget POST_APPLICATION_ADDR and POST_APPLICATION_SIZE when building bootloader
 #if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+#define APPLICATION_ADDR POST_APPLICATION_ADDR
+#define APPLICATION_SIZE POST_APPLICATION_SIZE
+#endif
 
-#define SCRATCH_START_ADDR	((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+#define SCRATCH_START_ADDR ((APPLICATION_ADDR + APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
 
 MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
     return mbed::BlockDevice::get_default_instance();
@@ -27,8 +31,8 @@ MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
 mbed::BlockDevice* mcuboot_secondary_bd = get_secondary_bd();
 
 /** Internal application block device */
-static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
-		POST_APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
+static FlashIAPBlockDevice mcuboot_primary_bd(APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
+        APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
 
 /** Scratch space is at the end of internal flash, after the main application */
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
@@ -47,6 +51,7 @@ int initialize_flash_areas(void) {
     for(int i = 0; i < 3; i++) {
         flash_map_bd[i]->init();
     }
+    return 0;
 }
 
 int flash_area_open(uint8_t id, const struct flash_area** fapp) {
@@ -68,7 +73,7 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 	// Only populate the offset if it's internal
 	switch(id) {
 	case PRIMARY_ID:
-		fap->fa_off = POST_APPLICATION_ADDR;
+		fap->fa_off = APPLICATION_ADDR;
 		break;
 	case SECONDARY_ID:
 		fap->fa_off = 0;
@@ -223,5 +228,3 @@ int flash_area_id_to_multi_image_slot(int image_index, int area_id)
 //    //BOOT_LOG_ERR("invalid flash area ID");
 //    return -1;
 }
-
-#endif
