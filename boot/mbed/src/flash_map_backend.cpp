@@ -199,7 +199,8 @@ int flash_area_id_to_image_slot(int area_id) {
  */
 int flash_area_id_from_multi_image_slot(int image_index, int slot)
 {
-    return FLASH_AREA_IMAGE_PRIMARY(image_index);
+    //FIXME
+    return slot;
 //    switch (slot) {
 //    case 0: return FLASH_AREA_IMAGE_PRIMARY(image_index);
 //#if !defined(MBED_CONF_MCUBOOT_SINGLE_IMAGE_DFU)
