@@ -15,13 +15,21 @@
 #include "BlockDevice.h"
 #include "FlashIAPBlockDevice.h"
 
-// Retarget POST_APPLICATION_ADDR and POST_APPLICATION_SIZE when building bootloader
 #if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
-#define APPLICATION_ADDR POST_APPLICATION_ADDR
-#define APPLICATION_SIZE POST_APPLICATION_SIZE
+// Size of application during bootloader build does not take into account scratch space
+#define SCRATCH_START_ADDR ((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+#else
+// Size of application during non-bootloader build takes into account scratch space
+#define SCRATCH_START_ADDR (APPLICATION_ADDR + APPLICATION_SIZE)
 #endif
 
-#define SCRATCH_START_ADDR ((APPLICATION_ADDR + APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+#if MBED_CONF_MCUBOOT_DEBUG_ADDRESSES
+#define XSTR(x) STR(x)
+#define STR(x) #x
+#pragma message "The value of APPLICATION_ADDR: " XSTR(APPLICATION_ADDR)
+#pragma message "The value of APPLICATION_SIZE: " XSTR(APPLICATION_SIZE)
+#pragma message "The value of SCRATCH_START_ADDR: " XSTR(SCRATCH_START_ADDR)
+#endif
 
 MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
     return mbed::BlockDevice::get_default_instance();
@@ -31,8 +39,13 @@ MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
 mbed::BlockDevice* mcuboot_secondary_bd = get_secondary_bd();
 
 /** Internal application block device */
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
+        POST_APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
+#else
 static FlashIAPBlockDevice mcuboot_primary_bd(APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
-        APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
+        APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE);
+#endif
 
 /** Scratch space is at the end of internal flash, after the main application */
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
@@ -73,7 +86,11 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 	// Only populate the offset if it's internal
 	switch(id) {
 	case PRIMARY_ID:
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+	    fap->fa_off = POST_APPLICATION_ADDR;
+#else
 		fap->fa_off = APPLICATION_ADDR;
+#endif
 		break;
 	case SECONDARY_ID:
 		fap->fa_off = 0;
