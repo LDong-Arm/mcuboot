@@ -69,8 +69,11 @@ int main(void) {
 		}
 	}
 
-	// Run the application in the primary slot
-	mbed_start_application(rsp.br_image_off);
+	/**
+	 * Run the application in the primary slot
+	 * Add header size offset to calculate the actual start address of application
+	 */
+	mbed_start_application(rsp.br_image_off + MBED_CONF_MCUBOOT_HEADER_SIZE);
 }
 
 #endif

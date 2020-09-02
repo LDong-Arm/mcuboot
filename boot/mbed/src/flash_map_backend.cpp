@@ -16,8 +16,61 @@
 #include "FlashIAPBlockDevice.h"
 
 #if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
-// Size of application during bootloader build does not take into account scratch space
-#define SCRATCH_START_ADDR ((POST_APPLICATION_ADDR + POST_APPLICATION_SIZE) - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+
+/**
+ * Calculating the primary slot start address
+ * When built, the bootloader is given a size constraint: target.restrict_size
+ *
+ * The Mbed build tools automatically create two macros:
+ * POST_APPLICATION_ADDR = target.restrict_size
+ * POST_APPLICATION_SIZE = end of program memory - target.restrict_size
+ *
+ * We want to avoid having the bootloader collide with the primary
+ * slot header (which is immediately before the primary slot in memory)
+ *
+ * So the first instruction of the primary application is NOT actually located
+ * at the POST_APPLICATION_ADDR address, which instead points to the primary slot
+ * header region.
+ *
+ */
+#define PRIMARY_SLOT_START_ADDR POST_APPLICATION_ADDR
+#define PRIMARY_APP_START_ADDR  (PRIMARY_SLOT_START_ADDR + MBED_CONF_MCUBOOT_HEADER_SIZE)
+#define PRIMARY_SLOT_SIZE       (POST_APPLICATION_SIZE - MBED_CONF_MCUBOOT_SCRATCH_SIZE)
+
+#else
+
+/**
+ * In the case of the main application build, the user sets up two configuration
+ * parameters, target.mbed_app_start and target.mbed_app_size
+ *
+ * Based on these, Mbed's build tools define two build macros:
+ * APPLICATION_ADDR = target.mbed_app_start
+ * APPLICATION_SIZE = target.mbed_app_size
+ *
+ * Since the primary slot BlockDevice must start at the header info region,
+ * we must subtract MBED_CONF_MCUBOOT_HEADER_SIZE from the APPLICATION_ADDR
+ * macro and similarly add the header size to the APPLICATION_SIZE macro
+ *
+ */
+#define PRIMARY_SLOT_START_ADDR (APPLICATION_ADDR - MBED_CONF_MCUBOOT_HEADER_SIZE)
+#define PRIMARY_APP_START_ADDR  APPLICATION_ADDR
+#define PRIMARY_SLOT_SIZE       (APPLICATION_SIZE + MBED_CONF_MCUBOOT_HEADER_SIZE)
+
+#endif
+
+#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
+
+/**
+ * Calculating the scratch start address
+ *
+ * During bootloader builds, the aforementioned POST_APPLICATION_SIZE macro
+ * does not take into account any other partitions that may divide the primary
+ * slot space.
+ *
+ * So the scratch start address can be calculated as below
+ *
+ */
+#define SCRATCH_START_ADDR (PRIMARY_SLOT_START_ADDR + PRIMARY_SLOT_SIZE)
 #else
 // Size of application during non-bootloader build takes into account scratch space
 #define SCRATCH_START_ADDR (APPLICATION_ADDR + APPLICATION_SIZE)
@@ -39,17 +92,10 @@ MBED_WEAK mbed::BlockDevice* get_secondary_bd(void) {
 mbed::BlockDevice* mcuboot_secondary_bd = get_secondary_bd();
 
 /** Internal application block device */
-#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
-static FlashIAPBlockDevice mcuboot_primary_bd(POST_APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
-        POST_APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE-MBED_CONF_MCUBOOT_SCRATCH_SIZE);
-#else
-static FlashIAPBlockDevice mcuboot_primary_bd(APPLICATION_ADDR-MBED_CONF_MCUBOOT_HEADER_SIZE,
-        APPLICATION_SIZE+MBED_CONF_MCUBOOT_HEADER_SIZE);
-#endif
+static FlashIAPBlockDevice mcuboot_primary_bd(PRIMARY_SLOT_START_ADDR, PRIMARY_SLOT_SIZE);
 
 /** Scratch space is at the end of internal flash, after the main application */
 static FlashIAPBlockDevice mcuboot_scratch_bd(SCRATCH_START_ADDR, MBED_CONF_MCUBOOT_SCRATCH_SIZE);
-
 
 static mbed::BlockDevice* flash_map_bd[3] = {
 		(mbed::BlockDevice*) &mcuboot_primary_bd,		/** Primary (loadable) image area */
@@ -86,11 +132,7 @@ int flash_area_open(uint8_t id, const struct flash_area** fapp) {
 	// Only populate the offset if it's internal
 	switch(id) {
 	case PRIMARY_ID:
-#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
-	    fap->fa_off = POST_APPLICATION_ADDR;
-#else
-		fap->fa_off = APPLICATION_ADDR;
-#endif
+	    fap->fa_off = PRIMARY_SLOT_START_ADDR;
 		break;
 	case SECONDARY_ID:
 		fap->fa_off = 0;
