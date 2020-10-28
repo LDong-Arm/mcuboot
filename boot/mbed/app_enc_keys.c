@@ -1,36 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright (c) 2020 Embedded Planet
+ * SPDX-License-Identifier: Apache-2.0
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
  */
-
-#if MBED_CONF_MCUBOOT_BOOTLOADER_BUILD
 
 #include <bootutil/sign_key.h>
-
-// TODO - Remove Zephyr references
-// TODO - Make framework option of multiple public keys
-
-/*
- * Even though this is in principle a Zephyr-specific file, the
- * simulator builds it and uses it as well. Because of that, we can't
- * use Kconfig symbols for key types, and have to rely on the MCUBoot
- * symbols (which Zephyr provides via this header, and the simulator
- * provides via the compiler command line).
- */
 #include <mcuboot_config/mcuboot_config.h>
 
 #if defined(MCUBOOT_SIGN_RSA)
@@ -82,8 +67,6 @@ const struct bootutil_key bootutil_enc_key = {
 };
 #elif defined(MCUBOOT_ENCRYPT_KW)
 #error "Encrypted images with AES-KW is not implemented yet."
-#endif
-
 #endif
 
 #endif

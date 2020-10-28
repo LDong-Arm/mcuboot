@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2018 Open Source Foundries Limited
+ * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2020 Linaro Limited
+ * Copyright (c) 2020 Embedded Planet
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,167 +11,52 @@
 #define __MCUBOOT_CONFIG_H__
 
 /*
- * Signature types
- *
- * You must choose exactly one signature type.
+ * For available configurations and their explanations,
+ * see mbed_lib.json.
  */
+
 #define SIGNATURE_TYPE_RSA      0
 #define SIGNATURE_TYPE_EC256    1
 #define SIGNATURE_TYPE_ED25519  2
 
-/* Default to RSA-2048 signatures */
-#if !defined(MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM)
-#define MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM 0
-#define MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH 2048
-#endif
-
-#if (MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_RSA)
+/*
+ * Signature algorithm
+ */
+#if (MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_RSA)
 #define MCUBOOT_SIGN_RSA
-#  if (MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH != 2048 && \
-       MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH != 3072)
+#  if (MCUBOOT_RSA_SIGNATURE_LENGTH != 2048 && \
+       MCUBOOT_RSA_SIGNATURE_LENGTH != 3072)
 #    error "Invalid RSA key size (must be 2048 or 3072)"
 #  else
-#    define MCUBOOT_SIGN_RSA_LEN MBED_CONF_MCUBOOT_RSA_SIGNATURE_LENGTH
+#    define MCUBOOT_SIGN_RSA_LEN MCUBOOT_RSA_SIGNATURE_LENGTH
 #  endif
-#elif (MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_EC256)
+#elif (MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_EC256)
 #define MCUBOOT_SIGN_EC256
-#elif (MBED_CONF_MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_ED25519)
+#elif (MCUBOOT_SIGNATURE_ALGORITHM == SIGNATURE_TYPE_ED25519)
 #define MCUBOOT_SIGN_ED25519
 #endif
 
-#if MBED_CONF_MCUBOOT_USE_MBED_TLS
+/*
+ * Crypto backend
+ */
+#if (MCUBOOT_CRYPTO_BACKEND == MBEDTLS)
 #define MCUBOOT_USE_MBED_TLS
-#elif MBED_CONF_MCUBOOT_USE_TINYCRYPT
+#elif (MCUBOOT_CRYPTO_BACKEND == TINYCRYPT)
+#error TinyCrypt backend is not supported until RNG from Mbed OS is integrated
 #define MCUBOOT_USE_TINYCRYPT
 #endif
 
-// TODO - Support for Cryptocell310?
-//#if MBED_CONF_CRYPTOCELL310_PRESENT
-//#define MCUBOOT_USE_CC310
-//#endif
-
-#if MBED_CONF_MCUBOOT_HARDWARE_KEY
-#define MCUBOOT_HW_KEY
-#endif
-
-#if MBED_CONF_MCUBOOT_OVERWRITE_ONLY
-#define MCUBOOT_OVERWRITE_ONLY
-#endif
-
 /*
- * Always check the signature of the image in the primary slot before booting,
- * even if no upgrade was performed. This is recommended if the boot
- * time penalty is acceptable.
+ * Only one image (two slots) supported for now
  */
-#if MBED_CONF_MCUBOOT_VALIDATE_PRIMARY_SLOT
-#define MCUBOOT_VALIDATE_PRIMARY_SLOT
-#endif
-
-/*
- * Upgrade mode
- *
- * The default is to support A/B image swapping with rollback.  A
- * simpler code path, which only supports overwriting the
- * existing image with the update image, is also available.
- */
-
-#ifdef MCUBOOT_OVERWRITE_ONLY
-#if MBED_CONF_MCUBOOT_OVERWRITE_ONLY_FAST
-/* Only erase and overwrite those primary slot sectors needed
- * to install the new image, rather than the entire image slot. */
-#define MCUBOOT_OVERWRITE_ONLY_FAST
-#endif
-#endif
-
-#if MBED_CONF_MCUBOOT_SINGLE_IMAGE_DFU
-#define MCUBOOT_SINGLE_IMAGE_DFU 1
-#else
-
-#if MBED_CONF_MCUBOOT_BOOT_SWAP_MOVE
-#define MCUBOOT_SWAP_USING_MOVE 1
-#endif
-
-#if MBED_CONF_MCUBOOT_UPDATEABLE_IMAGE_NUMBER
-#define MCUBOOT_IMAGE_NUMBER    MBED_CONF_MCUBOOT_UPDATEABLE_IMAGE_NUMBER
-#else
 #define MCUBOOT_IMAGE_NUMBER 1
-#endif
-
-#if MBED_CONF_MCUBOOT_SWAP_SAVE_ENCTLV
-#define MCUBOOT_SWAP_SAVE_ENCTLV 1
-#endif
-
-#endif /* MBED_CONF_MCUBOOT_SINGLE_IMAGE_DFU */
-
-/*
- * Logging
- */
-
-/*
- * If logging is enabled the following functions must be defined by the
- * platform:
- *
- *    MCUBOOT_LOG_MODULE_REGISTER(domain)
- *      Register a new log module and add the current C file to it.
- *
- *    MCUBOOT_LOG_MODULE_DECLARE(domain)
- *      Add the current C file to an existing log module.
- *
- *    MCUBOOT_LOG_ERR(...)
- *    MCUBOOT_LOG_WRN(...)
- *    MCUBOOT_LOG_INF(...)
- *    MCUBOOT_LOG_DBG(...)
- *
- * The function priority is:
- *
- *    MCUBOOT_LOG_ERR > MCUBOOT_LOG_WRN > MCUBOOT_LOG_INF > MCUBOOT_LOG_DBG
- */
-
-#if MBED_CONF_MCUBOOT_ENABLE_LOGGING
-#define MCUBOOT_HAVE_LOGGING 1
-#endif
 
 /*
  * Encrypted Images
  */
-#if MBED_CONF_MCUBOOT_ENCRYPT_RSA
+#if defined(MCUBOOT_ENCRYPT_RSA) || defined(MCUBOOT_ENCRYPT_EC256) || defined(MCUBOOT_ENCRYPT_X25519)
 #define MCUBOOT_ENC_IMAGES
-#define MCUBOOT_ENCRYPT_RSA
-#elif MBED_CONF_MCUBOOT_ENCRYPT_EC256
-#define MCUBOOT_ENC_IMAGES
-#define MCUBOOT_ENCRYPT_EC256
-#elif MBED_CONF_MCUBOOT_ENCRYPT_X25519
-#define MCUBOOT_ENC_IMAGES
-#define MCUBOOT_ENCRYPT_X25519
 #endif
-
-#if MBED_CONF_MCUBOOT_BOOTSTRAP
-#define MCUBOOT_BOOTSTRAP
-#endif
-
-#if MBED_CONF_MCUBOOT_USE_BENCH
-#define MCUBOOT_USE_BENCH
-#endif
-
-#if MBED_CONF_MCUBOOT_DOWNGRADE_PREVENTION
-#define MCUBOOT_DOWNGRADE_PREVENTION
-#endif
-
-#if MBED_CONF_MCUBOOT_HW_DOWNGRADE_PREVENTION
-#define MCUBOOT_HW_ROLLBACK_PROT
-#endif
-
-#if MBED_CONF_MCUBOOT_MEASURED_BOOT
-#define MCUBOOT_MEASURED_BOOT
-#endif
-
-#if MBED_CONF_MCUBOOT_SHARE_DATA
-#define MCUBOOT_DATA_SHARING
-#endif
-
-/*
- * Flash abstraction
- */
 
 /*
  * Enabling this option uses newer flash map APIs. This saves RAM and
@@ -176,17 +64,11 @@
  */
 #define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 
-/* Default maximum number of flash sectors per image slot; change
- * as desirable. */
-#if !defined(MBED_CONF_MCUBOOT_MAX_IMG_SECTORS)
-#define MCUBOOT_MAX_IMG_SECTORS 128
-#else
-#define MCUBOOT_MAX_IMG_SECTORS MBED_CONF_MCUBOOT_MAX_IMG_SECTORS
-#endif
-
-#define MCUBOOT_WATCHDOG_FEED()         \
-    do {                                \
-        /* TODO: to be implemented */   \
+/*
+ * No watchdog integration for now
+ */
+#define MCUBOOT_WATCHDOG_FEED()                 \
+    do {                                        \
     } while (0)
 
 
